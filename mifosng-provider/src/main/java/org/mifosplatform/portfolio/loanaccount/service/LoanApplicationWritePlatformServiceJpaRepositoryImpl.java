@@ -229,6 +229,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     newLoanApplication.getTermPeriodFrequencyType(), productRelatedDetail.getNumberOfRepayments(),
                     productRelatedDetail.getRepayEvery(), productRelatedDetail.getRepaymentPeriodFrequencyType().getValue(),
                     newLoanApplication);
+					
+			this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.LOAN_SUBMITTED, newLoanApplication);
 
             this.loanRepository.save(newLoanApplication);
 

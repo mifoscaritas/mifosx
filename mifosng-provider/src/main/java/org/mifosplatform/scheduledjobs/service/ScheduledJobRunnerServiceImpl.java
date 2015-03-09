@@ -348,7 +348,18 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         if (sb.length() > 0) {
             jdbcTemplate.update(insertSql + sb.toString());
         }
+        }
 
+    @Transactional
+    @Override
+    @CronTarget(jobName = JobName.UPDATE_CLIENT_SUB_STATUS)
+    public void updateClientSubStatus() {
+        
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
+        
+        final int result = jdbcTemplate.update("call doClientSubStatusUpdates()");
+
+        logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Results affected by update: " + result);
     }
 
 }

@@ -47,6 +47,7 @@ import org.mifosplatform.portfolio.savings.domain.DepositAccountOnHoldTransactio
 import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
 import org.mifosplatform.portfolio.savings.exception.InsufficientAccountBalanceException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.AbstractPersistable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -512,6 +513,20 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                 validateGuarantorBusinessRules(loan);
             }
         }
+
+		@Override
+		public void businessEventToBeExecuted(
+				AbstractPersistable<Long> businessEventEntity) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void businessEventWasExecuted(
+				AbstractPersistable<Long> businessEventEntity) {
+			// TODO Auto-generated method stub
+			
+		}
     }
 
     private class HoldFundsOnBusinessEvent implements BusinessEventListner {
@@ -527,6 +542,20 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                 holdGuarantorFunds(loan);
             }
         }
+
+		@Override
+		public void businessEventToBeExecuted(
+				AbstractPersistable<Long> businessEventEntity) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void businessEventWasExecuted(
+				AbstractPersistable<Long> businessEventEntity) {
+			// TODO Auto-generated method stub
+			
+		}
     }
 
     private class ReleaseFundsOnBusinessEvent implements BusinessEventListner {
@@ -546,6 +575,20 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                 }
             }
         }
+
+		@Override
+		public void businessEventToBeExecuted(
+				AbstractPersistable<Long> businessEventEntity) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void businessEventWasExecuted(
+				AbstractPersistable<Long> businessEventEntity) {
+			// TODO Auto-generated method stub
+			
+		}
     }
 
     private class ReverseFundsOnBusinessEvent implements BusinessEventListner {
@@ -563,6 +606,20 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                 reverseTransaction(reersedTransactions);
             }
         }
+
+		@Override
+		public void businessEventToBeExecuted(
+				AbstractPersistable<Long> businessEventEntity) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void businessEventWasExecuted(
+				AbstractPersistable<Long> businessEventEntity) {
+			// TODO Auto-generated method stub
+			
+		}
     }
 
     private class AdjustFundsOnBusinessEvent implements BusinessEventListner {
@@ -585,6 +642,20 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                 releaseGuarantorFunds(loanTransaction);
             }
         }
+
+		@Override
+		public void businessEventToBeExecuted(
+				AbstractPersistable<Long> businessEventEntity) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void businessEventWasExecuted(
+				AbstractPersistable<Long> businessEventEntity) {
+			// TODO Auto-generated method stub
+			
+		}
     }
 
     private class ReverseAllFundsOnBusinessEvent implements BusinessEventListner {
@@ -602,6 +673,20 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                 reverseTransaction(reersedTransactions);
             }
         }
+
+		@Override
+		public void businessEventToBeExecuted(
+				AbstractPersistable<Long> businessEventEntity) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void businessEventWasExecuted(
+				AbstractPersistable<Long> businessEventEntity) {
+			// TODO Auto-generated method stub
+			
+		}
     }
 
     private class UndoAllFundTransactions implements BusinessEventListner {
@@ -617,6 +702,20 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                 reverseAllFundTransaction(loan);
             }
         }
+
+		@Override
+		public void businessEventToBeExecuted(
+				AbstractPersistable<Long> businessEventEntity) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void businessEventWasExecuted(
+				AbstractPersistable<Long> businessEventEntity) {
+			// TODO Auto-generated method stub
+			
+		}
     }
 
     private class ReleaseAllFunds implements BusinessEventListner {
@@ -632,6 +731,20 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                 releaseAllGuarantors(loanTransaction);
             }
         }
+
+		@Override
+		public void businessEventToBeExecuted(
+				AbstractPersistable<Long> businessEventEntity) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void businessEventWasExecuted(
+				AbstractPersistable<Long> businessEventEntity) {
+			// TODO Auto-generated method stub
+			
+		}
     }
 
 }

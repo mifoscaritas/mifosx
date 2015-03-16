@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.mifosplatform.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
 import org.mifosplatform.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
+import org.springframework.data.jpa.domain.AbstractPersistable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -99,5 +100,16 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
         }
         businessEventListners.add(businessEventListner);
     }
+
+	@Override
+	public void notifyBusinessEventsToBeExecuted(BUSINESS_EVENTS businessEvent,
+			AbstractPersistable<Long> businessEventEntity) {
+		  List<BusinessEventListner> businessEventListners = this.preListners.get(businessEvent);
+	        if (businessEventListners != null) {
+	            for (BusinessEventListner eventListner : businessEventListners) {
+	                eventListner.businessEventToBeExecuted(businessEventEntity);
+	            }
+	        }
+	}
 
 }

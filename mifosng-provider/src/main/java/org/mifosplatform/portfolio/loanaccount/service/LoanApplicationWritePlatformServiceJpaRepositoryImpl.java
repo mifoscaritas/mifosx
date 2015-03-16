@@ -237,7 +237,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     productRelatedDetail.getRepayEvery(), productRelatedDetail.getRepaymentPeriodFrequencyType().getValue(),
                     newLoanApplication);
 					
-			this.businessEventNotifierService.notifyBusinessEventToBeExecuted(BUSINESS_EVENTS.LOAN_SUBMITTED,constructEntityMap(BUSINESS_ENTITY.LOAN_SUBMITTED, newLoanApplication));
+			this.businessEventNotifierService.notifyBusinessEventsToBeExecuted(BUSINESS_EVENTS.LOAN_SUBMITTED,newLoanApplication);
 
             this.loanRepository.save(newLoanApplication);
 
@@ -1007,6 +1007,12 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
     private Map<BUSINESS_ENTITY, Object> constructEntityMap(final BUSINESS_ENTITY entityEvent, Object entity) {
         Map<BUSINESS_ENTITY, Object> map = new HashMap<>(1);
+        map.put(entityEvent, entity);
+        return map;
+    }
+    
+    private Map<BUSINESS_EVENTS, Object> constructEntityMap(final BUSINESS_EVENTS entityEvent, Object entity) {
+        Map<BUSINESS_EVENTS, Object> map = new HashMap<>(1);
         map.put(entityEvent, entity);
         return map;
     }

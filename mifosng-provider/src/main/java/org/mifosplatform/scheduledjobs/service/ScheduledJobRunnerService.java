@@ -9,19 +9,19 @@ import org.mifosplatform.infrastructure.jobs.exception.JobExecutionException;
 
 public interface ScheduledJobRunnerService {
 
-    void updateLoanSummaryDetails();
+	void updateLoanSummaryDetails();
 
-    void updateLoanPaidInAdvance();
+	void updateLoanPaidInAdvance();
 
-    void applyAnnualFeeForSavings();
+	void applyAnnualFeeForSavings();
 
-    void applyDueChargesForSavings() throws JobExecutionException;
+	void applyDueChargesForSavings() throws JobExecutionException;
 
-    void updateNPA();
+	void updateNPA();
 
-    void updateMaturityDetailsOfDepositAccounts();
+	void updateMaturityDetailsOfDepositAccounts();
 
-    void generateRDSchedule();
-
-    void updateClientSubStatus();
+	void updateClientSubStatus();
+	
+	void generateRDSchedule();
 }

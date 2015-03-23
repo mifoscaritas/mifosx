@@ -41,8 +41,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService {
 
     private final static Logger logger = LoggerFactory.getLogger(ScheduledJobRunnerServiceImpl.class);
-    private final DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
-    private final DateTimeFormatter formatterWithTime = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+    private final DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd"); 	 	
+    private final DateTimeFormatter formatterWithTime = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"); 
 
     private final RoutingDataSourceServiceFactory dataSourceServiceFactory;
     private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
@@ -146,6 +146,46 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Results affected by update: " + result);
     }
 
+   /* @Transactional
+    @Override
+    @CronTarget(jobName = JobName.UPDATE_LOAN_ARREARS_AGEING)
+    public void updateLoanArrearsAgeingDetails() {
+
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(this.dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
+
+        jdbcTemplate.execute("truncate table m_loan_arrears_aging");
+
+        final StringBuilder updateSqlBuilder = new StringBuilder(900);
+
+        updateSqlBuilder
+                .append("INSERT INTO m_loan_arrears_aging(`loan_id`,`principal_overdue_derived`,`interest_overdue_derived`,`fee_charges_overdue_derived`,`penalty_charges_overdue_derived`,`total_overdue_derived`,`overdue_since_date_derived`)");
+        updateSqlBuilder.append("select ml.id as loanId,");
+        updateSqlBuilder
+                .append("SUM((ifnull(mr.principal_amount,0) - ifnull(mr.principal_completed_derived, 0))) as principal_overdue_derived,");
+        updateSqlBuilder
+                .append("SUM((ifnull(mr.interest_amount,0)  - ifnull(mr.interest_completed_derived, 0))) as interest_overdue_derived,");
+        updateSqlBuilder
+                .append("SUM((ifnull(mr.fee_charges_amount,0)  - ifnull(mr.fee_charges_completed_derived, 0))) as fee_charges_overdue_derived,");
+        updateSqlBuilder
+                .append("SUM((ifnull(mr.penalty_charges_amount,0)  - ifnull(mr.penalty_charges_completed_derived, 0))) as penalty_charges_overdue_derived,");
+        updateSqlBuilder.append("SUM((ifnull(mr.principal_amount,0) - ifnull(mr.principal_completed_derived, 0))) +");
+        updateSqlBuilder.append("SUM((ifnull(mr.interest_amount,0)  - ifnull(mr.interest_completed_derived, 0))) +");
+        updateSqlBuilder.append("SUM((ifnull(mr.fee_charges_amount,0)  - ifnull(mr.fee_charges_completed_derived, 0))) +");
+        updateSqlBuilder
+                .append("SUM((ifnull(mr.penalty_charges_amount,0)  - ifnull(mr.penalty_charges_completed_derived, 0))) as total_overdue_derived,");
+        updateSqlBuilder.append("MIN(mr.duedate) as overdue_since_date_derived ");
+        updateSqlBuilder.append(" FROM m_loan ml ");
+        updateSqlBuilder.append(" INNER JOIN m_loan_repayment_schedule mr on mr.loan_id = ml.id ");
+        updateSqlBuilder.append(" WHERE ml.loan_status_id = 300 "); // active
+        updateSqlBuilder.append(" and mr.completed_derived is false ");
+        updateSqlBuilder.append(" and mr.duedate < SUBDATE(CURDATE(),INTERVAL  ifnull(ml.grace_on_arrears_ageing,0) day) ");
+        updateSqlBuilder.append(" GROUP BY ml.id");
+
+        final int result = jdbcTemplate.update(updateSqlBuilder.toString());
+
+        logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Results affected by update: " + result);
+    }
+*/
     @Transactional
     @Override
     @CronTarget(jobName = JobName.UPDATE_LOAN_PAID_IN_ADVANCE)
@@ -294,7 +334,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
         logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Deposit accounts affected by update: " + depositAccounts.size());
     }
-
+    
     @Override
     @CronTarget(jobName = JobName.GENERATE_RD_SCEHDULE)
     public void generateRDSchedule() {
@@ -350,6 +390,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         }
         }
 
+
     @Transactional
     @Override
     @CronTarget(jobName = JobName.UPDATE_CLIENT_SUB_STATUS)
@@ -361,5 +402,6 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
         logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Results affected by update: " + result);
     }
+    
 
 }

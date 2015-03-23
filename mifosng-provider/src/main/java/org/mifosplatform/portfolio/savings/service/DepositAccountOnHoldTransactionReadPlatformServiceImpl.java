@@ -87,14 +87,15 @@ public class DepositAccountOnHoldTransactionReadPlatformServiceImpl implements
 
 			final StringBuilder sqlBuilder = new StringBuilder(400);
 			sqlBuilder
-					.append("tr.id as transactionId, tr.transaction_type_enum as transactionType, ");
+					.append(" tr.id as transactionId, tr.transaction_type_enum as transactionType, ");
 			sqlBuilder
-					.append("tr.transaction_date as transactionDate, tr.amount as transactionAmount,");
+					.append(" tr.transaction_date as transactionDate, tr.amount as transactionAmount,");
 			sqlBuilder
-					.append("tr.is_reversed as reversed, sa.account_no as savingsAccNum, ");
-			sqlBuilder.append("sc.display_name as savingsClientName, ");
+					.append(" tr.is_reversed as reversed, sa.account_no as savingsAccNum, ");
 			sqlBuilder
-					.append("ml.account_no as loanAccountNum, lc.display_name as loanClientName");
+					.append("sc.display_name as savingsClientName, ml.id as loanid, sa.id as savingid, ");
+			sqlBuilder
+					.append(" ml.account_no as loanAccountNum, lc.display_name as loanClientName");
 			sqlBuilder.append(" from m_savings_account sa  ");
 			sqlBuilder
 					.append(" join m_deposit_account_on_hold_transaction tr on sa.id = tr.savings_account_id ");
@@ -118,8 +119,7 @@ public class DepositAccountOnHoldTransactionReadPlatformServiceImpl implements
 
 		@Override
 		public DepositAccountOnHoldTransactionData mapRow(final ResultSet rs,
-				final int rowNum)
-				throws SQLException {
+				final int rowNum) throws SQLException {
 			final Long id = rs.getLong("transactionId");
 			final int transactionTypeInt = JdbcSupport.getInteger(rs,
 					"transactionType");
@@ -131,13 +131,16 @@ public class DepositAccountOnHoldTransactionReadPlatformServiceImpl implements
 			final BigDecimal amount = JdbcSupport
 					.getBigDecimalDefaultToZeroIfNull(rs, "transactionAmount");
 			final boolean reversed = rs.getBoolean("reversed");
-			final String savingsAccNum = rs.getString("savingsAccNum");
+			final String savingsAccountNum = rs.getString("savingsAccNum");
+			final Long savingsId = rs.getLong("savingid");
 			final String savingsClientName = rs.getString("savingsClientName");
 			final String loanAccountNum = rs.getString("loanAccountNum");
+			final Long loanId = rs.getLong("loanid");
 			final String loanClientName = rs.getString("loanClientName");
 			return DepositAccountOnHoldTransactionData.instance(id, amount,
-					transactionType, date, reversed, savingsAccNum,
-					savingsClientName, loanAccountNum, loanClientName);
+					transactionType, date, reversed, savingsId,
+					savingsAccountNum, savingsClientName, loanId,
+					loanAccountNum, loanClientName);
 		}
 	}
 

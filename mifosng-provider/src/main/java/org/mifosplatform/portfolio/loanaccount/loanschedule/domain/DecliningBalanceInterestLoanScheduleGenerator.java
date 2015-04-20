@@ -57,7 +57,7 @@ public class DecliningBalanceInterestLoanScheduleGenerator extends AbstractLoanS
         if (principalVariation != null) {
             for (Map.Entry<LocalDate, Money> principal : principalVariation.entrySet()) {
                 if (!principal.getKey().isAfter(periodEndDate)) {
-                    int interestForDays = Days.daysBetween(interestStartDate, principal.getKey()).getDays();
+                    int interestForDays = Days.daysBetween(interestStartDate,/*periodEndDate*/ principal.getKey()).getDays();
                     if (interestForDays > 0) {
                         final PrincipalInterest result = loanApplicationTerms.calculateTotalInterestForPeriod(calculator,
                                 interestCalculationGraceOnRepaymentPeriodFraction, periodNumber, mc, cumulatingInterestDueToGrace,

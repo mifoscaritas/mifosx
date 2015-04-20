@@ -486,6 +486,9 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
     public boolean isInterestFirstRepaymentScheduleTransactionProcessor() {
         return false;
     }
+    
+    @Override
+    public abstract boolean isFullPeriodInterestToBeCollectedForLatePaymentsAfterLastInstallment ();
 
     @Override
     public void handleRefund(LoanTransaction loanTransaction, MonetaryCurrency currency,

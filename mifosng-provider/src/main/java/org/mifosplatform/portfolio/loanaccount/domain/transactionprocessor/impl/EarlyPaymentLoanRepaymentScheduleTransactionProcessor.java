@@ -176,4 +176,10 @@ public class EarlyPaymentLoanRepaymentScheduleTransactionProcessor extends Abstr
         return transactionAmountRemaining;
     }
 
+    @Override
+    public boolean isFullPeriodInterestToBeCollectedForLatePaymentsAfterLastInstallment() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
 }

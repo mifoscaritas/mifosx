@@ -513,6 +513,11 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     public boolean isOverdueOn(final LocalDate date) {
         return getDueDate().isBefore(date);
     }
+    
+    public boolean isTxnDateInCurrentInstallment (final LocalDate date)
+    {
+        return getFromDate().isBefore(date);
+    }
 
     public void updateChargePortion(final Money feeChargesDue, final Money feeChargesWaived, final Money feeChargesWrittenOff,
             final Money penaltyChargesDue, final Money penaltyChargesWaived, final Money penaltyChargesWrittenOff) {

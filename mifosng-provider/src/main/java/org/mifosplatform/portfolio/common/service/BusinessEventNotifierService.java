@@ -7,6 +7,8 @@ package org.mifosplatform.portfolio.common.service;
 
 import org.mifosplatform.portfolio.common.BusinessEventNotificationConstants.BUSINESS_EVENTS;
 import org.mifosplatform.portfolio.common.BusinessEventNotificationConstants.BUSINESS_ENTITY;
+import org.springframework.data.jpa.domain.AbstractPersistable;
+
 import java.util.Map;
 
 /**
@@ -20,6 +22,8 @@ public interface BusinessEventNotifierService {
      * Method should be called to notify listeners before Business event
      * execution for any pre-processing of event
      */
+    public void notifyBusinessEventsToBeExecuted(BUSINESS_EVENTS businessEvent, AbstractPersistable<Long> businessEventEntity);
+    
     public void notifyBusinessEventToBeExecuted(BUSINESS_EVENTS businessEvent, Map<BUSINESS_ENTITY, Object> businessEventEntity);
 
     /**

@@ -175,7 +175,7 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                     idealDisbursementDate, periodStartDateApplicableForInterest);
             int daysInPeriodApplicableForInterest = Days.daysBetween(periodStartDateApplicableForInterest, scheduledDueDate).getDays();
 
-            if (scheduleTillDate != null && scheduledDueDate.isAfter(scheduleTillDate)) {
+            if (scheduleTillDate != null && !scheduledDueDate.isBefore(scheduleTillDate)) {
                 scheduledDueDate = scheduleTillDate;
                 isNextRepaymentAvailable = false;
             }
@@ -744,7 +744,8 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
             actualRepaymentDate = this.scheduledDateGenerator.generateNextRepaymentDate(actualRepaymentDate, loanApplicationTerms,
                     isFirstRepayment);
             int daysInPeriod = Days.daysBetween(periodStartDate, actualRepaymentDate).getDays();
-            if (actualRepaymentDate.isAfter(currentDate)) {
+            if (actualRepaymentDate.isAfter(currentDate)
+                    && !loanRepaymentScheduleTransactionProcessor.isFullPeriodInterestToBeCollectedForLatePaymentsAfterLastInstallment()) {
                 actualRepaymentDate = currentDate;
             }
             outstanding = updateOutstandingFromLatePayment(periodStartDate, latePaymentMap, outstanding);
@@ -763,7 +764,46 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
                 }
                 List<LoanTransaction> currentTransactions = createCurrentTransactionList(detail);
 
-                if (!periodStartDate.isEqual(detail.getTransactionDate())) {
+                // newly added condition
+                if (!periodStartDate.isEqual(detail.getTransactionDate())// (currentDate)need
+                                                                         // modify
+                                                                         // if
+                                                                         // fails
+                        && loanRepaymentScheduleTransactionProcessor.isFullPeriodInterestToBeCollectedForLatePaymentsAfterLastInstallment()
+                        && !(installments.get(installments.size() - 1).getFromDate().toDate()
+                                .before(currentTransactions.get(0).getDateOf()) && installments.get(installments.size() - 1).getDueDate()
+                                .toDate().after(currentTransactions.get(0).getDateOf()))) {
+                    /*if (periodStartDate.isBefore(currentDate) && actualRepaymentDate.isAfter(currentDate)) {
+                        Money previousMoney = latePaymentMap.get(detail.getTransactionDate());
+                        latePaymentMap.remove(detail.getTransactionDate());
+                        latePaymentMap.put(actualRepaymentDate, previousMoney);
+                    }*/
+
+                    PrincipalInterest principalInterestForThisPeriod = calculatePrincipalInterestComponentsForPeriod(
+                            this.paymentPeriodsInOneYearCalculator, interestCalculationGraceOnRepaymentPeriodFraction,
+                            totalInterest.zero(), totalInterest.zero(), totalInterest.zero(), totalInterest.zero(), outstanding,
+                            loanApplicationTerms, periodNumberTemp, mc,
+                            mergeVariationsToMap(principalPortionMap, latePaymentMap, disburseDetailsMap, compoundingMap), compoundingMap,
+                            periodStartDate, actualRepaymentDate, daysInPeriod);
+                    Money interest = principalInterestForThisPeriod.interest();
+                    totalInterest = totalInterest.plus(interest);
+                    LoanScheduleModelRepaymentPeriod installment = LoanScheduleModelRepaymentPeriod.repayment(instalmentNumber++,
+                            startDate, actualRepaymentDate, totalInterest.zero(), totalInterest.zero(), totalInterest,
+                            totalInterest.zero(), totalInterest.zero(), totalInterest, true);
+                    periods.add(installment);
+                    totalCumulativeInterest = totalCumulativeInterest.plus(totalInterest);
+                    totalInterest = totalInterest.zero();
+                    addLoanRepaymentScheduleInstallment(installments, installment);
+                    periodStartDate = actualRepaymentDate;
+                    startDate = actualRepaymentDate;
+                } else {
+                    periodStartDate = actualRepaymentDate;
+                    startDate = actualRepaymentDate;
+                }
+                // original condition
+                if (!periodStartDate.isEqual(detail.getTransactionDate())
+                        && !loanRepaymentScheduleTransactionProcessor
+                                .isFullPeriodInterestToBeCollectedForLatePaymentsAfterLastInstallment()) {
                     PrincipalInterest principalInterestForThisPeriod = calculatePrincipalInterestComponentsForPeriod(
                             this.paymentPeriodsInOneYearCalculator, interestCalculationGraceOnRepaymentPeriodFraction,
                             totalInterest.zero(), totalInterest.zero(), totalInterest.zero(), totalInterest.zero(), outstanding,

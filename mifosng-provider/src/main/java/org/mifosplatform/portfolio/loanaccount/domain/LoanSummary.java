@@ -207,10 +207,10 @@ public final class LoanSummary {
         this.totalInterestWaived = summaryWrapper.calculateTotalInterestWaived(repaymentScheduleInstallments, currency).getAmount();
         this.totalInterestWrittenOff = summaryWrapper.calculateTotalInterestWrittenOff(repaymentScheduleInstallments, currency).getAmount();
 
-        if (totalInterestCharged.isGreaterThanZero()) {
+        //if (totalInterestCharged.isGreaterThanZero()) {
             this.totalInterestOutstanding = totalInterestCharged.minus(this.totalInterestRepaid).minus(this.totalInterestWaived)
                     .minus(this.totalInterestWrittenOff).getAmount();
-        }
+        //}
 
         final Money totalFeeChargesCharged = summaryWrapper.calculateTotalFeeChargesCharged(repaymentScheduleInstallments, currency).plus(
                 this.totalFeeChargesDueAtDisbursement);

@@ -5,8 +5,7 @@
  */
 package org.mifosplatform.integrationtests.common;
 
-import org.apache.http.HttpHeaders;
-
+import com.google.common.net.HttpHeaders;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 

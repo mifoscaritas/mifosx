@@ -485,6 +485,9 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
     }
 
     @Override
+    public abstract boolean isFullPeriodInterestToBeCollectedForLatePaymentsAfterLastInstallment();
+
+    @Override
     public void handleRefund(LoanTransaction loanTransaction, MonetaryCurrency currency,
             List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges) {
         // TODO Auto-generated method stub

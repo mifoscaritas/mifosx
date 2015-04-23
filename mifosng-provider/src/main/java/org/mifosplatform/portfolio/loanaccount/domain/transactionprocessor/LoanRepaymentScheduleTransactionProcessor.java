@@ -35,7 +35,7 @@ public interface LoanRepaymentScheduleTransactionProcessor {
      * installment.
      */
     boolean isInterestFirstRepaymentScheduleTransactionProcessor();
-
+    boolean isFullPeriodInterestToBeCollectedForLatePaymentsAfterLastInstallment();
     ChangedTransactionDetail populateDerivedFeildsWithoutReprocess(LocalDate disbursementDate,
             List<LoanTransaction> transactionsPostDisbursement, MonetaryCurrency currency,
             List<LoanRepaymentScheduleInstallment> installments, Set<LoanCharge> charges);

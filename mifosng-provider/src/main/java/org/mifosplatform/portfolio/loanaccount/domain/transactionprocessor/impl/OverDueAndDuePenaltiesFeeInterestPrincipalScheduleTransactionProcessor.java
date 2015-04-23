@@ -16,19 +16,27 @@ import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.Abstr
 import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 
 /**
- * Old Mifos style {@link LoanRepaymentScheduleTransactionProcessor}.
+ * OverDueAndDuePenaltiesFeeInterestPrincipal style
+ * {@link LoanRepaymentScheduleTransactionProcessor}.
  * 
- * For ALL types of transactions, pays off components in order of interest, then
- * principal.
+ * Per OverDueAndDuePenaltiesFeeInterestPrincipal regulations, all interest must
+ * be paid (both current and overdue as on monthly bases) before principal is
+ * paid.
  * 
- * Other formulas exist on mifos where you can choose 'Declining-Balance
- * Interest Recalculation' which simply means, recalculate the interest
- * component based on the how much principal is outstanding at a point in time;
- * but this isnt trying to model that option only the basic one for now.
+ * For example on a loan with two installments due (one current and one overdue)
+ * of 220 each (200 principal + 20 interest):
+ * 
+ * Partial Payment of 40 20 Payment to interest on Installment #1 (200 principal
+ * remaining) 20 Payment to interest on Installment #2 (200 principal remaining)
  */
-@SuppressWarnings("unused")
-public class MifosStyleLoanRepaymentScheduleTransactionProcessor extends AbstractLoanRepaymentScheduleTransactionProcessor {
+public class OverDueAndDuePenaltiesFeeInterestPrincipalScheduleTransactionProcessor extends
+        AbstractLoanRepaymentScheduleTransactionProcessor {
 
+    /**
+     * For creocore, early is defined as any date before the installment due
+     * date
+     */
+    @SuppressWarnings("unused")
     @Override
     protected boolean isTransactionInAdvanceOfInstallment(final int currentInstallmentIndex,
             final List<LoanRepaymentScheduleInstallment> installments, final LocalDate transactionDate, final Money transactionAmount) {
@@ -39,9 +47,9 @@ public class MifosStyleLoanRepaymentScheduleTransactionProcessor extends Abstrac
     }
 
     /**
-     * For early/'in advance' repayments, pay off in the same way as on-time
-     * payments, interest first then principal.
+     * For early/'in advance' repayments, pays off principal component only.
      */
+    @SuppressWarnings("unused")
     @Override
     protected Money handleTransactionThatIsPaymentInAdvanceOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
             final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction,
@@ -59,7 +67,98 @@ public class MifosStyleLoanRepaymentScheduleTransactionProcessor extends Abstrac
             final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction,
             final Money transactionAmountUnprocessed) {
 
-        return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, transactionAmountUnprocessed);
+        // pay of overdue and current interest due given transaction date
+        final LocalDate transactionDate = loanTransaction.getTransactionDate();
+        final MonetaryCurrency currency = transactionAmountUnprocessed.getCurrency();
+        Money transactionAmountRemaining = transactionAmountUnprocessed;
+        Money interestWaivedPortion = Money.zero(currency);
+        Money feeChargesPortion = Money.zero(currency);
+        Money penaltyChargesPortion = Money.zero(currency);
+
+        if (loanTransaction.isInterestWaiver()) {
+            interestWaivedPortion = currentInstallment.waiveInterestComponent(transactionDate, transactionAmountRemaining);
+            transactionAmountRemaining = transactionAmountRemaining.minus(interestWaivedPortion);
+
+            final Money principalPortion = Money.zero(transactionAmountRemaining.getCurrency());
+            loanTransaction.updateComponents(principalPortion, interestWaivedPortion, feeChargesPortion, penaltyChargesPortion);
+        } else if (loanTransaction.isChargePayment()) {
+            final Money principalPortion = Money.zero(currency);
+            final Money interestPortion = Money.zero(currency);
+            if (loanTransaction.isPenaltyPayment()) {
+                penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, transactionAmountRemaining);
+                transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
+            } else {
+                feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionDate, transactionAmountRemaining);
+                transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
+            }
+            loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
+        } else {
+
+            final LoanRepaymentScheduleInstallment currentInstallmentBasedOnTransactionDate = nearestInstallment(
+                    loanTransaction.getTransactionDate(), installments);
+            // int loanTerm=loanTransaction.getLoan().getTermFrequency();//new
+            // code By Venkat
+            for (final LoanRepaymentScheduleInstallment installment : installments) {
+                if (installment.isInterestDue(currency)
+                        && (installment.isTxnDateInCurrentInstallment(loanTransaction.getTransactionDate()) || installment
+                                .getInstallmentNumber().equals(currentInstallmentBasedOnTransactionDate.getInstallmentNumber()))) {
+                    penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, transactionAmountRemaining);
+                    transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
+
+                    feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionDate, transactionAmountRemaining);
+                    transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
+
+                    // Money interestPortion=null;
+                    /*
+                     * //Newly added Venkat - from here if
+                     * (installment.getInstallmentNumber() >=
+                     * installments.size() &&
+                     * !(transactionDate.isBefore(installment.getDueDate()))) {
+                     * LocalDate dateForInterestCalculation =
+                     * transactionDate.dayOfMonth().withMaximumValue();
+                     * interestPortion =
+                     * installment.payInterestComponent(dateForInterestCalculation
+                     * , transactionAmountRemaining); } else { interestPortion =
+                     * installment.payInterestComponent(transactionDate,
+                     * transactionAmountRemaining); } //Newly added Venkat -
+                     * till here
+                     */// Original:
+                    final Money interestPortion = installment.payInterestComponent(transactionDate, transactionAmountRemaining);
+                    transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
+
+                    final Money principalPortion = Money.zero(currency);
+                    loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
+                }
+            }
+
+            // With whatever is remaining, pay off principal components of
+            // installments
+            for (final LoanRepaymentScheduleInstallment installment : installments) {
+                if (installment.isPrincipalNotCompleted(currency) && transactionAmountRemaining.isGreaterThanZero()) {
+                    final Money principalPortion = installment.payPrincipalComponent(transactionDate, transactionAmountRemaining);
+                    transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
+
+                    final Money interestPortion = Money.zero(currency);
+                    loanTransaction.updateComponents(principalPortion, interestPortion, Money.zero(currency), Money.zero(currency));
+                }
+            }
+        }
+
+        return transactionAmountRemaining;
+    }
+
+    private LoanRepaymentScheduleInstallment nearestInstallment(final LocalDate transactionDate,
+            final List<LoanRepaymentScheduleInstallment> installments) {
+
+        LoanRepaymentScheduleInstallment nearest = installments.get(0);
+        for (final LoanRepaymentScheduleInstallment installment : installments) {
+            if (installment.getDueDate().isBefore(transactionDate) || installment.getDueDate().isEqual(transactionDate)) {
+                nearest = installment;
+            } else if (installment.getDueDate().isAfter(transactionDate)) {
+                break;
+            }
+        }
+        return nearest;
     }
 
     /**
@@ -78,6 +177,7 @@ public class MifosStyleLoanRepaymentScheduleTransactionProcessor extends Abstrac
         Money penaltyChargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
 
         if (loanTransaction.isChargesWaiver()) {
+
             penaltyChargesPortion = currentInstallment.waivePenaltyChargesComponent(transactionDate,
                     loanTransaction.getPenaltyChargesPortion(currency));
             transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
@@ -89,8 +189,6 @@ public class MifosStyleLoanRepaymentScheduleTransactionProcessor extends Abstrac
         } else if (loanTransaction.isInterestWaiver()) {
             interestPortion = currentInstallment.waiveInterestComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
-
-            loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
         } else if (loanTransaction.isChargePayment()) {
             if (loanTransaction.isPenaltyPayment()) {
                 penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, transactionAmountRemaining);
@@ -99,8 +197,8 @@ public class MifosStyleLoanRepaymentScheduleTransactionProcessor extends Abstrac
                 feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionDate, transactionAmountRemaining);
                 transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
             }
-            loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
         } else {
+
             penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
 
@@ -112,32 +210,40 @@ public class MifosStyleLoanRepaymentScheduleTransactionProcessor extends Abstrac
 
             principalPortion = currentInstallment.payPrincipalComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
-
-            loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
         }
 
+        loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
         return transactionAmountRemaining;
     }
 
+    @SuppressWarnings("unused")
     @Override
     protected void onLoanOverpayment(final LoanTransaction loanTransaction, final Money loanOverPaymentAmount) {
-        // TODO - KW - dont do anything with loan over-payment for now
+        // dont do anything for with loan over-payment
     }
-    
+
+    @Override
+    public boolean isInterestFirstRepaymentScheduleTransactionProcessor() {
+        return false;
+    }
+
     @Override
     protected Money handleRefundTransactionPaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
             final LoanTransaction loanTransaction, final Money transactionAmountUnprocessed) {
 
         final LocalDate transactionDate = loanTransaction.getTransactionDate();
-        final MonetaryCurrency currency = transactionAmountUnprocessed.getCurrency();
+        // final MonetaryCurrency currency =
+        // transactionAmountUnprocessed.getCurrency();
         Money transactionAmountRemaining = transactionAmountUnprocessed;
         Money principalPortion = Money.zero(transactionAmountRemaining.getCurrency());
         Money interestPortion = Money.zero(transactionAmountRemaining.getCurrency());
         Money feeChargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
         Money penaltyChargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
 
-        principalPortion = currentInstallment.unpayPrincipalComponent(transactionDate, transactionAmountRemaining);
-        transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
+        if (transactionAmountRemaining.isGreaterThanZero()) {
+            principalPortion = currentInstallment.unpayPrincipalComponent(transactionDate, transactionAmountRemaining);
+            transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
+        }
 
         if (transactionAmountRemaining.isGreaterThanZero()) {
             interestPortion = currentInstallment.unpayInterestComponent(transactionDate, transactionAmountRemaining);
@@ -153,6 +259,7 @@ public class MifosStyleLoanRepaymentScheduleTransactionProcessor extends Abstrac
             penaltyChargesPortion = currentInstallment.unpayPenaltyChargesComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
         }
+
         loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
 
         return transactionAmountRemaining;
@@ -160,7 +267,6 @@ public class MifosStyleLoanRepaymentScheduleTransactionProcessor extends Abstrac
 
     @Override
     public boolean isFullPeriodInterestToBeCollectedForLatePaymentsAfterLastInstallment() {
-        // TODO Auto-generated method stub
-        return false;
+        return true;
     }
 }

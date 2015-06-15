@@ -1166,6 +1166,27 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    
+    public CommandWrapperBuilder createSavingInvestment(final Long savingsAccountId){
+        this.actionName = "CREATE";
+        this.entityName = "SAVINGINVESTMENT";
+        this.savingsId = savingsAccountId;
+        this.entityId = savingsAccountId;
+        this.href = "/savingsaccounts/" + savingsAccountId + "/savingInvestment";
+        return this;
+    }
+    
+    public CommandWrapperBuilder deleteInvestmentBasedOnMapping(final Long savingsAccountId, final Long loanId){
+        
+        this.actionName = "DELETE";
+        this.entityName = "SAVINGINVESTMENT";
+        this.savingsId = savingsAccountId;
+        this.entityId = loanId;
+        this.href = "/savingsaccounts/" + savingsAccountId + "/savingInvestment";
+        return this;
+        
+    }
+    
     public CommandWrapperBuilder createSavingsAccountCharge(final Long savingsAccountId) {
         this.actionName = "CREATE";
         this.entityName = "SAVINGSACCOUNTCHARGE";

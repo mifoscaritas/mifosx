@@ -37,6 +37,17 @@ public class SavingInvestmentReadPlatformServiceImpl implements SavingInvestment
         
        }
        
+    @Override
+    public List<Long> retriveLoanIdBySavingId(Long savingId){
+
+      final SavingInvestmentDataMapper mapp = new SavingInvestmentDataMapper();
+      final String schema = "select ms.loan_id from m_saving_investment ms" + " where ms.saving_id = " + savingId;
+      
+      List<Long> data = this.jdbcTemplate.queryForList(schema, null, Long.class);
+       return data;
+    }
+
+    
     private static final class SavingInvestmentDataMapper implements RowMapper<SavingInvestmentData>{
 
         public String savingAccountsSchema(){
@@ -45,6 +56,9 @@ public class SavingInvestmentReadPlatformServiceImpl implements SavingInvestment
                     + " left join m_loan ml on ms.loan_id = ml.id left join m_client cl on ml.client_id = cl.id left join m_product_loan mpl on ml.product_id = mpl.id ";            
         }
      
+        public String loanAccountSchema(){
+            return "ms.loan_id from m_saving_investment ms";
+        }
 
         @Override
         public SavingInvestmentData mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -56,11 +70,12 @@ public class SavingInvestmentReadPlatformServiceImpl implements SavingInvestment
             final String productname = rs.getString("productname");
             
             List<SavingInvestmentData> savingInvestmentData = null;
-            final SavingInvestmentData data = SavingInvestmentData.instance(loan_id, accountno, name, loanammount, productname, savingInvestmentData);
+            final SavingInvestmentData data = SavingInvestmentData.instance(loan_id, accountno, name, loanammount, productname, null, null);
             // TODO Auto-generated method stub
             return data;
         }
         
     }
 
+   
 }

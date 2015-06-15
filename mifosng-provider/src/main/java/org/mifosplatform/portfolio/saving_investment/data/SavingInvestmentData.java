@@ -9,20 +9,32 @@ public class SavingInvestmentData implements Comparable<SavingInvestmentData> {
     final String accountno;
     final Long loanammount;
     final String productname;
-    private final List<SavingInvestmentData> savingInvestmentData;
+    final Long savigId;
+    final List<Long> loanId;
 
-    public SavingInvestmentData(Long loan_id, String name, String accountno, Long loanammount, String productname,
-            List<SavingInvestmentData> savingInvestmentData) {
-
+    
+    public SavingInvestmentData(Long loan_id, String name, String accountno, Long loanammount, String productname, Long savigId,
+            List<Long> loanId) {
+        super();
         this.loan_id = loan_id;
         this.name = name;
         this.accountno = accountno;
         this.loanammount = loanammount;
         this.productname = productname;
-        this.savingInvestmentData = savingInvestmentData;
+        this.savigId = savigId;
+        this.loanId = loanId;
     }
 
     
+    public Long getSavigId() {
+        return this.savigId;
+    }
+
+    
+    public List<Long> getLoanId() {
+        return this.loanId;
+    }
+
     public String getAccountno() {
         return this.accountno;
     }
@@ -52,14 +64,10 @@ public class SavingInvestmentData implements Comparable<SavingInvestmentData> {
        
         return 0;
     }
-
-    public List<SavingInvestmentData> getSavingInvestmentData() {
-        return savingInvestmentData;
-    }
-
-    public static SavingInvestmentData instance(Long loan_id, String name, String accountno, Long loanammount, String productname, List<SavingInvestmentData> savingInvestmentData) {
+    public static SavingInvestmentData instance(Long loan_id, String name, String accountno, Long loanammount, String productname, Long savingId,
+            List<Long> loanId) {
        
-        return new SavingInvestmentData(loan_id, accountno, name, loanammount, productname, savingInvestmentData);
+        return new SavingInvestmentData(loan_id, accountno, name, loanammount, productname, savingId, loanId);
     }
 
 }

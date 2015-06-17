@@ -96,8 +96,18 @@ public class SavingInvestmentWritePlatformServiceRepositoryImpl implements Savin
 
     @Override
     public CommandProcessingResult deleteInvestmentBasedOnMapping(Long savingId, Long loanId) {
+
+        Long id = null;
+
+        id = this.savingInvestment.retriveInvestmentId(savingId, loanId);
+        
+
+        SavingInvestment savingInvestment = this.repositoryWrapper.findWithNotFoundDetection(id);
+
+         this.repositoryWrapper.delete(savingInvestment);
+        
         // TODO Auto-generated method stub
-        return null;
+        return new CommandProcessingResultBuilder().build();
     }
 
 }

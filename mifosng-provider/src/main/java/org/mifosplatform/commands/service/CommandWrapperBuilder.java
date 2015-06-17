@@ -1181,7 +1181,8 @@ public class CommandWrapperBuilder {
         this.actionName = "DELETE";
         this.entityName = "SAVINGINVESTMENT";
         this.savingsId = savingsAccountId;
-        this.entityId = loanId;
+        this.loanId = loanId;
+        this.entityId = savingsAccountId;
         this.href = "/savingsaccounts/" + savingsAccountId + "/savingInvestment";
         return this;
         

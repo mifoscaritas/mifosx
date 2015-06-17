@@ -1,6 +1,6 @@
 package org.mifosplatform.portfolio.saving_investment.domain;
 
-import org.mifosplatform.portfolio.client.domain.Client;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,4 +26,10 @@ public class SavingInvestmentRepositoryWrapper {
     public void delete(final SavingInvestment saving) {
         this.repository.delete(saving);
     }
+
+   public SavingInvestment findWithNotFoundDetection(final Long id){
+       final SavingInvestment savingInvestment = this.repository.findOne(id);
+       return savingInvestment;
+       
+   }
 }

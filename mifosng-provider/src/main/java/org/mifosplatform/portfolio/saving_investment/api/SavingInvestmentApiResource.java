@@ -36,18 +36,20 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 public class SavingInvestmentApiResource {
+
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("savingInvestment"));
-    
+
     private final SavingInvestmentReadPlatformService savingInvestmentReadPlatformService;
     private final PlatformSecurityContext context;
     private final DefaultToApiJsonSerializer<SavingInvestmentData> apiJsonSerializerService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    
+
     @Autowired
     public SavingInvestmentApiResource(SavingInvestmentReadPlatformService savingInvestmentReadPlatformService,
-            PlatformSecurityContext context, DefaultToApiJsonSerializer<SavingInvestmentData> apiJsonSerializerService, 
-            ApiRequestParameterHelper apiRequestParameterHelper, PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+            PlatformSecurityContext context, DefaultToApiJsonSerializer<SavingInvestmentData> apiJsonSerializerService,
+            ApiRequestParameterHelper apiRequestParameterHelper,
+            PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.savingInvestmentReadPlatformService = savingInvestmentReadPlatformService;
         this.context = context;
         this.apiJsonSerializerService = apiJsonSerializerService;
@@ -58,49 +60,47 @@ public class SavingInvestmentApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retriveAccounts(@PathParam("savingsAccountId") final Long savingId, @Context final UriInfo uriInfo) throws SQLException{
-      
-     //   this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+    public String retriveAccounts(@PathParam("savingsAccountId") final Long savingId, @Context final UriInfo uriInfo) throws SQLException {
+
+        this.context.authenticatedUser().validateHasReadPermission(SavingInvestmentConstants.SAVINGINVESTMENT_RESOURCE_NAME);
+
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        
-       List<SavingInvestmentData> data = this.savingInvestmentReadPlatformService.retriveAccountsById(savingId);
-        
+
+        List<SavingInvestmentData> data = this.savingInvestmentReadPlatformService.retriveAccountsById(savingId);
+
         return this.apiJsonSerializerService.serialize(settings, data, RESPONSE_DATA_PARAMETERS);
     }
-    
+
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String addSavingInvestment(@PathParam("savingsAccountId") final Long savingsAccountId, final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder()
-                .createSavingInvestment(savingsAccountId)
-                .withJson(apiRequestBodyAsJson)
-                .build();
+        this.context.authenticatedUser().validateHasReadPermission(SavingInvestmentConstants.SAVINGINVESTMENT_RESOURCE_NAME);
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createSavingInvestment(savingsAccountId)
+                .withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        
+
         return this.apiJsonSerializerService.serialize(result);
-        
+
     }
-    
+
     @DELETE
-    @Path("{loanId}")
-    @Consumes({ MediaType.APPLICATION_JSON})
-    @Produces({ MediaType.APPLICATION_JSON})
-    public String deleteInvestmentBasedOnMapping(@PathParam("savingsAccountId") final Long savingsAccountId, @PathParam("loanId") final Long loanId){
-       
-        
-        final CommandWrapper commandRequest = new CommandWrapperBuilder()
-                            .deleteInvestmentBasedOnMapping(savingsAccountId, loanId)
-                            .build();
-        
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String deleteInvestmentBasedOnMapping(@PathParam("savingsAccountId") final Long savingsAccountId,
+            @QueryParam("loanId") final Long loanId) {
+
+        this.context.authenticatedUser().validateHasReadPermission(SavingInvestmentConstants.SAVINGINVESTMENT_RESOURCE_NAME);
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteInvestmentBasedOnMapping(savingsAccountId, loanId).build();
+
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        
+
         return this.apiJsonSerializerService.serialize(result);
-        
-        
+
     }
-    
 
 }

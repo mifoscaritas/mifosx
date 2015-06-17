@@ -10,4 +10,5 @@ public interface SavingInvestmentReadPlatformService {
 
     List<SavingInvestmentData> retriveAccountsById(final Long savingId) throws SQLException;
     List<Long> retriveLoanIdBySavingId(final Long savingId);
+    Long retriveInvestmentId(final Long savingId, Long loanId);
 }

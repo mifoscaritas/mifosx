@@ -37,6 +37,19 @@ public class SavingInvestmentReadPlatformServiceImpl implements SavingInvestment
         
        }
        
+    
+
+    @Override
+    public Long retriveInvestmentId(Long savingId, Long loanId) {
+        
+        final String schema = "select ms.id from m_saving_investment ms " + " where ms.saving_id = " + savingId + " and ms.loan_id = " + loanId;
+       
+        Long data = this.jdbcTemplate.queryForLong(schema);
+        
+        return data;
+    }
+
+    
     @Override
     public List<Long> retriveLoanIdBySavingId(Long savingId){
 
@@ -76,6 +89,7 @@ public class SavingInvestmentReadPlatformServiceImpl implements SavingInvestment
         }
         
     }
+
 
    
 }

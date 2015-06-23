@@ -1,10 +1,10 @@
-package org.mifosplatform.portfolio.saving_investment.handler;
+package org.mifosplatform.portfolio.investment.handler;
 
 import org.mifosplatform.commands.annotation.CommandType;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.portfolio.saving_investment.service.SavingInvestmentWritePlatformService;
+import org.mifosplatform.portfolio.investment.service.InvestmentWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,14 +14,14 @@ import org.springframework.transaction.annotation.Transactional;
 @CommandType(entity = "SAVINGINVESTMENT", action = "DELETE")
 public class DeleteSavingInvestmentCommandHandler implements NewCommandSourceHandler{
 
-    private final SavingInvestmentWritePlatformService savingInvestmentWriteService;
+    private final InvestmentWritePlatformService savingInvestment;
   
     
     @Autowired
-    public DeleteSavingInvestmentCommandHandler(SavingInvestmentWritePlatformService savingInvestmentWriteService) {
+    public DeleteSavingInvestmentCommandHandler(InvestmentWritePlatformService savingInvestment) {
         super();
         // TODO Auto-generated constructor stub
-        this.savingInvestmentWriteService = savingInvestmentWriteService;
+        this.savingInvestment = savingInvestment;
     }
 
 
@@ -30,7 +30,7 @@ public class DeleteSavingInvestmentCommandHandler implements NewCommandSourceHan
     @Transactional
     @Override
     public CommandProcessingResult processCommand(JsonCommand command) {
-       return this.savingInvestmentWriteService.deleteInvestmentBasedOnMapping(command.getSavingsId(), command.getLoanId());
+       return this.savingInvestment.deleteInvestmentBasedOnMapping(command.getSavingsId(), command.getLoanId());
     }
     
 

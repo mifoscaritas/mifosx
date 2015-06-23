@@ -1188,6 +1188,25 @@ public class CommandWrapperBuilder {
         
     }
     
+    public CommandWrapperBuilder deleteLoanInvestment(final Long loanId, final Long savingId){
+        this.actionName = "DELETE";
+        this.entityName = "LOANINVESTMENT";
+        this.loanId = loanId;
+        this.savingsId = savingId;
+        this.entityId = loanId;
+        this.href = "/loans/" + loanId + "/loanInvestment";
+        return this;
+    }
+    
+    
+    public CommandWrapperBuilder createLoanInvestment(final Long loanId){
+        this.actionName = "CREATE";
+        this.entityName = "LOANINVESTMENT";
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/loanInvestment";
+        return this;
+    }
+    
     public CommandWrapperBuilder createSavingsAccountCharge(final Long savingsAccountId) {
         this.actionName = "CREATE";
         this.entityName = "SAVINGSACCOUNTCHARGE";

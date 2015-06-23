@@ -1,4 +1,4 @@
-package org.mifosplatform.portfolio.saving_investment.data;
+package org.mifosplatform.portfolio.investment.data;
 
 import java.util.List;
 

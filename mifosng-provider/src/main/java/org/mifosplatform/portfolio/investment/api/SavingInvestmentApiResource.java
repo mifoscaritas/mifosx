@@ -1,4 +1,4 @@
-package org.mifosplatform.portfolio.saving_investment.api;
+package org.mifosplatform.portfolio.investment.api;
 
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -26,8 +26,8 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.portfolio.saving_investment.data.SavingInvestmentData;
-import org.mifosplatform.portfolio.saving_investment.service.SavingInvestmentReadPlatformService;
+import org.mifosplatform.portfolio.investment.data.SavingInvestmentData;
+import org.mifosplatform.portfolio.investment.service.InvestmentReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -39,14 +39,14 @@ public class SavingInvestmentApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList("savingInvestment"));
 
-    private final SavingInvestmentReadPlatformService savingInvestmentReadPlatformService;
+    private final InvestmentReadPlatformService savingInvestmentReadPlatformService;
     private final PlatformSecurityContext context;
     private final DefaultToApiJsonSerializer<SavingInvestmentData> apiJsonSerializerService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
-    public SavingInvestmentApiResource(SavingInvestmentReadPlatformService savingInvestmentReadPlatformService,
+    public SavingInvestmentApiResource(InvestmentReadPlatformService savingInvestmentReadPlatformService,
             PlatformSecurityContext context, DefaultToApiJsonSerializer<SavingInvestmentData> apiJsonSerializerService,
             ApiRequestParameterHelper apiRequestParameterHelper,
             PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
@@ -62,11 +62,11 @@ public class SavingInvestmentApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retriveAccounts(@PathParam("savingsAccountId") final Long savingId, @Context final UriInfo uriInfo) throws SQLException {
 
-        this.context.authenticatedUser().validateHasReadPermission(SavingInvestmentConstants.SAVINGINVESTMENT_RESOURCE_NAME);
+        this.context.authenticatedUser().validateHasReadPermission(InvestmentConstants.SAVINGINVESTMENT_RESOURCE_NAME);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-        List<SavingInvestmentData> data = this.savingInvestmentReadPlatformService.retriveAccountsById(savingId);
+        List<SavingInvestmentData> data = this.savingInvestmentReadPlatformService.retriveLoanAccountsBySavingId(savingId);
 
         return this.apiJsonSerializerService.serialize(settings, data, RESPONSE_DATA_PARAMETERS);
     }
@@ -76,7 +76,7 @@ public class SavingInvestmentApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String addSavingInvestment(@PathParam("savingsAccountId") final Long savingsAccountId, final String apiRequestBodyAsJson) {
 
-        this.context.authenticatedUser().validateHasReadPermission(SavingInvestmentConstants.SAVINGINVESTMENT_RESOURCE_NAME);
+        this.context.authenticatedUser().validateHasReadPermission(InvestmentConstants.SAVINGINVESTMENT_RESOURCE_NAME);
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createSavingInvestment(savingsAccountId)
                 .withJson(apiRequestBodyAsJson).build();
@@ -93,7 +93,7 @@ public class SavingInvestmentApiResource {
     public String deleteInvestmentBasedOnMapping(@PathParam("savingsAccountId") final Long savingsAccountId,
             @QueryParam("loanId") final Long loanId) {
 
-        this.context.authenticatedUser().validateHasReadPermission(SavingInvestmentConstants.SAVINGINVESTMENT_RESOURCE_NAME);
+        this.context.authenticatedUser().validateHasReadPermission(InvestmentConstants.SAVINGINVESTMENT_RESOURCE_NAME);
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteInvestmentBasedOnMapping(savingsAccountId, loanId).build();
 

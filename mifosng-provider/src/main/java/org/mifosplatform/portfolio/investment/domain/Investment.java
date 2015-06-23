@@ -1,4 +1,4 @@
-package org.mifosplatform.portfolio.saving_investment.domain;
+package org.mifosplatform.portfolio.investment.domain;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.portfolio.client.api.ClientApiConstants;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepositoryWrapper;
-import org.mifosplatform.portfolio.saving_investment.data.SavingInvestmentData;
+import org.mifosplatform.portfolio.investment.data.SavingInvestmentData;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -27,8 +27,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
-@Table(name = "m_saving_investment")
-public class SavingInvestment extends AbstractPersistable<Long> {
+@Table(name = "m_investment")
+public class Investment extends AbstractPersistable<Long> {
     
     @Column(name = "saving_id", nullable = false)
     private Long savingId;
@@ -36,12 +36,12 @@ public class SavingInvestment extends AbstractPersistable<Long> {
     @Column(name = "loan_id", nullable = false)
     private Long loanId;
     
-    protected SavingInvestment() {
+    protected Investment() {
         //
     }
 
    
-    public SavingInvestment(Long savingId, Long loanId) {
+    public Investment(Long savingId, Long loanId) {
         // super();
         this.savingId = savingId;
         this.loanId = loanId;
